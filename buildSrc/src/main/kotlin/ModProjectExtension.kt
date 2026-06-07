@@ -87,8 +87,10 @@ private fun getFullProjectVersion(mcVersion: String?, modVersion: String): Strin
 val Project.placeholderProps: Map<String, Any?>
     get() = mapOf(
         "mod_id" to modId,
+        "mod_wrapper_id" to wrapperModId,
         "mod_name" to modName,
         "mod_version" to fullProjectVersion,
+        "mod_description" to modDescription,
         "mod_homepage" to modHomepage,
         "mod_license" to modLicense,
         "mod_sources" to modSources,
