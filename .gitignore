@@ -3,7 +3,6 @@
 .kotlin
 build.number
 gradle-app.setting
-!gradle-wrapper.jar
 !gradle-wrapper.properties
 .gradletasknamecache
 
@@ -13,6 +12,7 @@ gradle-app.setting
 *.ctxt
 .mtj.tmp/
 *.jar
+!gradle-wrapper.jar
 *.war
 *.nar
 *.ear
