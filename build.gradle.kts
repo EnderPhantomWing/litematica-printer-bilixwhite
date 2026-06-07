@@ -27,7 +27,7 @@ preprocess {
     val mc12111 = createNode(   "1.21.11",1_21_11, "mojang")
     val mc260102 = createNode(  "26.1.2", 26_01_02,"mojang")
 
-    mc11802.link(mc11904,   file("versions/mapping-1.18.2-1.19.4.txt"))
+    mc11802.link(mc11904,   file("mappings/mapping-1.18.2-1.19.4.txt"))
     mc11904.link(mc12001,   null)
     mc12001.link(mc12002,   null)
     mc12002.link(mc12004,   null)
@@ -35,11 +35,11 @@ preprocess {
     mc12006.link(mc12101,   null)
     mc12101.link(mc12103,   null)
     mc12103.link(mc12104,   null)
-    mc12104.link(mc12105,   file("versions/mapping-1.21.4-1.21.5.txt"))
+    mc12104.link(mc12105,   file("mappings/mapping-1.21.4-1.21.5.txt"))
     mc12105.link(mc12108,   null)
     mc12108.link(mc12110,   null)
     mc12110.link(mc12111,   null)
-    mc12111.link(mc260102,  file("versions/mapping-1.21.11-26.1.txt"))
+    mc12111.link(mc260102,  file("mappings/mapping-1.21.11-26.1.txt"))
 
     // See https://github.com/Fallen-Breath/fabric-mod-template/blob/1d72d77a1c5ce0bf060c2501270298a12adab679/build.gradle#L55-L63
     for (node in getNodes()) {
