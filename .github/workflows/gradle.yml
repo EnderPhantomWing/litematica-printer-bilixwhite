@@ -1,0 +1,9 @@
+name: Dev Builds
+
+on:
+  push:
+    branches: [ '**' ] # stop build tag commits
+
+jobs:
+  build:
+    uses: ./.github/workflows/build.yml

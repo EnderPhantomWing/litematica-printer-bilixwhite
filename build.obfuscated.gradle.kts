@@ -9,7 +9,7 @@ plugins {
     id("com.replaymod.preprocess")
 }
 
-version = fullProjectVersion
+version = fullProjectVersionName
 group = modMavenGroup
 
 repositories {
@@ -79,6 +79,12 @@ dependencies {
         modImplementation("curse.maven:quick-shulker-362669:${prop("quick_shulker")}")
         modImplementation("net.kyrptonaught:kyrptconfig:${prop("kyrptconfig")}")
     }
+}
+
+if (System.getenv("JITPACK") == "true") {
+    base.archivesName.set("$modArchivesBaseName-mc$mcVersion")
+} else {
+    base.archivesName.set(modArchivesBaseName)
 }
 
 loom {

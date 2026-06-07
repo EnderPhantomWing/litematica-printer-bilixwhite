@@ -7,7 +7,7 @@ plugins {
     id("com.replaymod.preprocess")
 }
 
-version = fullProjectVersion
+version = fullProjectVersionName
 group = modMavenGroup
 
 repositories {
@@ -54,6 +54,12 @@ dependencies {
             implementation(files(quickshulkerFile))
         }
     }
+}
+
+if (System.getenv("JITPACK") == "true") {
+    base.archivesName.set("$modArchivesBaseName-mc$mcVersion")
+} else {
+    base.archivesName.set(modArchivesBaseName)
 }
 
 loom {

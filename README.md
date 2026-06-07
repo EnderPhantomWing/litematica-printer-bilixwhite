@@ -1,29 +1,29 @@
 # Litematica Printer
 
-![GitHub stars](https://img.shields.io/github/stars/BiliXWhite/litematica-printer)
-![GitHub release](https://img.shields.io/github/v/release/BiliXWhite/litematica-printer)
-![Minecraft](https://img.shields.io/badge/Minecraft-1.18.2%20~%201.21.10-blue)
+![GitHub stars](https://img.shields.io/github/stars/EnderPhantomWing/litematica-printer-bilixwhite)
+![GitHub release](https://img.shields.io/github/v/release/EnderPhantomWing/litematica-printer-bilixwhite)
+![Minecraft](https://img.shields.io/badge/Minecraft-1.18.2%20~%2026.1.2-blue)
 
 > [!WARNING]
 > 该 README 正在重构，目前的内容可能不完整或有误。请耐心等待更新或者贡献这个项目。
 
-为 [Litematica](https://modrinth.com/mod/litematica) 投影添加自动建造功能的 Minecraft Fabric 模组。支持 1.18.2 ~ 1.21.10 版本。
+为 [Litematica](https://modrinth.com/mod/litematica) 投影添加自动建造功能的 Minecraft Fabric 模组。支持 1.18.2 ~ 26.1.2 版本。
 
 该分支基于[宅咸鱼二改版](https://github.com/zhaixianyu/litematica-printer)修改，添加了更多实用功能。
 
 如果你觉得好用，欢迎给项目点个 Star ⭐️
 
 > [!TIP]
-> 该分支始终保持开源免费，不会存在任何收费内容。条件允许的话可以给作者[买瓶脉动](https://ifdian.net/a/BlinkWhite)支持一下！
+> 该分支始终保持开源免费，不会存在任何收费内容。  
+> Release 只会上传单版本的构建产物。如果需要多版本的 jar 包可以从github actions构建产物中下载
 
 ---
 
 ## 📥 下载
 
-| 渠道              | 链接                                                                |
-|-----------------|-------------------------------------------------------------------|
-| GitHub Releases | [点击下载](https://github.com/BiliXWhite/litematica-printer/releases) |
-| 蓝奏云分流（密码: cgxw） | [点击下载](https://xeno.lanzoue.com/b00l1v20vi)                       |
+| 渠道              | 链接                                                                                 |
+|-----------------|------------------------------------------------------------------------------------|
+| GitHub Releases | [点击下载](https://github.com/EnderPhantomWing/litematica-printer-bilixwhite/releases) |
 
 ---
 
@@ -32,7 +32,7 @@
 | 版本支持                                                |
 |-----------------------------------------------------|
 | 1.18.2 · 1.19.4 · 1.20.1 · 1.20.2 · 1.20.4 · 1.20.6 |
-| 1.21.1 ~ 1.21.11 · 26.1                             |
+| 1.21.1 ~ 1.21.11 · 26.1.x                           |
 
 > [!NOTE]
 > 1.18.2 以下版本暂不接受更新，小版本是否可用请自行尝试
@@ -112,8 +112,8 @@
 ### 命令行编译
 
 ```bash
-git clone https://github.com/BiliXWhite/litematica-printer.git
-cd litematica-printer
+git clone https://github.com/EnderPhantomWing/litematica-printer-bilixwhite.git
+cd litematica-printer-bilixwhite
 ./gradlew build
 ```
 
@@ -136,10 +136,6 @@ cd litematica-printer
 
 ### 📌 推荐加入 QQ 群
 
-[点击加入 QQ 群聊](http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=ttinzrJB3jYRLSTJM8R2YfwYdCm4Zo90&authKey=vfwF)
-
----
-
 ### Q: 开启打印后，打印机不工作？
 
 **可能原因：**
@@ -150,7 +146,7 @@ cd litematica-printer
 - 开启「使用数据包打印」模式
 - 调大「打印机工作间隔」
 
-如仍无法解决，请提交 [Issue](https://github.com/BiliXWhite/litematica-printer/issues/new?template=bug%E6%8A%A5%E5%91%8A.yml)
+如仍无法解决，请提交 [Issue](https://github.com/EnderPhantomWing/litematica-printer-bilixwhite/issues/new?template=bug%E6%8A%A5%E5%91%8A.yml)
 
 ---
 
@@ -165,7 +161,7 @@ cd litematica-printer
 - 增大「打印机工作间隔」
 - 降低建造速度
 
-如问题持续，请提交 [Issue](https://github.com/BiliXWhite/litematica-printer/issues/new?template=%E6%89%93%E5%8D%A0%E6%96%B9%E5%9D%97%E8%AF%B7%E6%B1%82.yml)
+如问题持续，请提交 [Issue](https://github.com/EnderPhantomWing/litematica-printer-bilixwhite/issues/new?template=%E6%89%93%E5%8D%A0%E6%96%B9%E5%9D%97%E8%AF%B7%E6%B1%82.yml)
 
 ---
 
@@ -181,7 +177,7 @@ cd litematica-printer
 - 确认所选择的工作模式是正确的
 
 > [!NOTE]
-> 快捷潜影盒功能仍处于测试阶段，如遇问题请提交 [Issue](https://github.com/BiliXWhite/litematica-printer/issues)
+> 快捷潜影盒功能仍处于测试阶段，如遇问题请提交 [Issue](https://github.com/EnderPhantomWing/litematica-printer-bilixwhite/issues)
 
 ---
 

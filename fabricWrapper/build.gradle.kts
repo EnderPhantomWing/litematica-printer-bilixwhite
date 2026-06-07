@@ -14,10 +14,12 @@ repositories {
 }
 
 group = modMavenGroup
-version = fullProjectVersion
+version = fullProjectVersionName
 
-base {
-    archivesName.set("$modArchivesBaseName-versionpack")
+if (System.getenv("JITPACK") == "true") {
+    base.archivesName.set("$modArchivesBaseName-mc$mcVersion")
+} else {
+    base.archivesName.set(modArchivesBaseName)
 }
 
 val fabricSubprojects = rootProject.subprojects.filter { it.name != "fabricWrapper" }

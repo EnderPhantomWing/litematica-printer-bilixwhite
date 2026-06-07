@@ -1,3 +1,5 @@
+import groovy.json.JsonSlurper
+
 pluginManagement {
     repositories {
         mavenLocal()
@@ -16,22 +18,19 @@ pluginManagement {
 }
 
 
-val versions = listOf(
-    "1.18.2",
-    "1.19.4",
-    "1.20.1", "1.20.2", "1.20.4", "1.20.6",
-    "1.21.1", "1.21.3", "1.21.4", "1.21.5", "1.21.6", "1.21.9", "1.21.11",
-    "26.1"
-)
+val jsonFile = file("settings.json")
+val jsonText = jsonFile.readText()
+val settings = JsonSlurper().parseText(jsonText) as Map<String, Any>
+val versions = settings["versions"] as List<String>
 
 for (version in versions) {
     include(":$version")
     project(":$version").apply {
         projectDir = file("versions/$version")
         buildFileName = if (parseMcVersionToNumber(version) > 260000) {
-            "../../build.fabric.gradle.kts"
+            "../../build.unobfuscated.gradle.kts"
         } else {
-            "../../build.fabric.remap.gradle.kts"
+            "../../build.obfuscated.gradle.kts"
         }
     }
 }
