@@ -12,8 +12,8 @@
     "bunnyi116"
   ],
   "contact": {
-    "website": "${mod_homepage}",
-    "homepage": "${mod_sources}",
+    "homepage": "${mod_homepage}",
+    "issues": "${mod_sources}/issues",
     "sources": "${mod_sources}"
   },
   "license": "${mod_license}",

@@ -42,9 +42,15 @@ dependencies {
     implementation("com.terraformersmc:modmenu:${prop("modmenu")}")
 
     // Masa
-    implementation("fi.dy.masa.malilib:${prop("malilib")}")
-    implementation("fi.dy.masa.litematica:${prop("litematica")}")
-    implementation("fi.dy.masa.tweakeroo:${prop("tweakeroo")}")
+    if(mcVersionInt >= 260200) {
+        implementation("com.github.sakura-ryoko:malilib:${prop("malilib_dev")}")
+        implementation("com.github.sakura-ryoko:litematica:${prop("litematica_dev")}")
+        implementation("com.github.sakura-ryoko:tweakeroo:${prop("tweakeroo_dev")}")
+    } else {
+        implementation("fi.dy.masa.malilib:${prop("malilib")}")
+        implementation("fi.dy.masa.litematica:${prop("litematica")}")
+        implementation("fi.dy.masa.tweakeroo:${prop("tweakeroo")}")
+    }
 
     // 快捷潜影盒
     val quickshulkerUrl = prop("quickshulker").toString()

@@ -1,16 +1,17 @@
 package me.aleksilassila.litematica.printer.mixin.printer.mc;
 
-import me.aleksilassila.litematica.printer.handler.ClientPlayerTickManager;
-import me.aleksilassila.litematica.printer.utils.RenderUtils;
 import me.aleksilassila.litematica.printer.config.Configs;
 import me.aleksilassila.litematica.printer.enums.WorkingModeType;
 import me.aleksilassila.litematica.printer.handler.ClientPlayerTickHandler;
+import me.aleksilassila.litematica.printer.handler.ClientPlayerTickManager;
 import me.aleksilassila.litematica.printer.handler.GuiBlockInfo;
 import me.aleksilassila.litematica.printer.handler.handlers.GuiHandler;
 import me.aleksilassila.litematica.printer.utils.ConfigUtils;
+import me.aleksilassila.litematica.printer.utils.RenderUtils;
+import net.minecraft.client.DeltaTracker;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.Gui;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.gui.Hud;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -23,17 +24,8 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
-//#if MC <= 11904
-//$$import com.mojang.blaze3d.vertex.PoseStack;
-//#elseif MC > 12006
-import net.minecraft.client.DeltaTracker;
-//#endif
-
-/**
- * HUD渲染Mixin，负责打印器调试信息和进度条的绘制
- */
-@Mixin(Gui.class)
-public abstract class MixinGui {
+@Mixin(Hud.class)
+public abstract class MixinHud {
     @Unique
     private static final int DEBUG_PADDING = 4;
     @Unique
@@ -85,23 +77,9 @@ public abstract class MixinGui {
     }
 
     // @formatter:off
-    //#if MC >= 260200
-    //$$
-    //#elseif MC >= 260100
-    //$$ @Inject(method = "extractHotbarAndDecorations", at = @At("TAIL"))
-    //#else
-    @Inject(method = "renderItemHotbar", at = @At("TAIL"))
-    //#endif
+    @Inject(method = "extractHotbarAndDecorations", at = @At("TAIL"))
 
-    //#if MC > 12006
-    private void hookRenderItemHotbar(GuiGraphics guiGraphics, DeltaTracker deltaTracker, CallbackInfo ci) {
-    //#elseif MC >= 12006
-    //$$ private void hookRenderItemHotbar(GuiGraphics guiGraphics, float f, CallbackInfo ci) {
-    //#elseif MC > 11904 && MC < 12006
-    //$$ private void hookRenderItemHotbar(float f, GuiGraphics guiGraphics, CallbackInfo ci) {
-    //#else
-    //$$ private void hookRenderItemHotbar(float f, PoseStack poseStack, CallbackInfo ci) {
-    //#endif
+    private void hookRenderItemHotbar(GuiGraphicsExtractor guiGraphics, DeltaTracker deltaTracker, CallbackInfo ci) {
         Minecraft mc = Minecraft.getInstance();
         if (mc.player == null || mc.level == null || mc.player.isSpectator() || !ConfigUtils.isPrinterEnable()) {
             return;
@@ -111,11 +89,7 @@ public abstract class MixinGui {
         float scaledHeight = mc.getWindow().getGuiScaledHeight();
 
         // 初始化渲染矩阵
-        //#if MC > 11904
         RenderUtils.initGuiGraphics(guiGraphics);
-        //#else
-        //$$ RenderUtils.initMatrix(poseStack);
-        //#endif
 
         if (Configs.Core.DEBUG_OUTPUT.getBooleanValue()) {
             drawDebugInfo(scaledWidth, scaledHeight);
@@ -341,3 +315,4 @@ public abstract class MixinGui {
         }
     }
 }
+
