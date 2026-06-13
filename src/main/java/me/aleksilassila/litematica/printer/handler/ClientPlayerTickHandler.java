@@ -348,8 +348,7 @@ public abstract class ClientPlayerTickHandler extends ConfigUtils {
         if (cachedIterator == null) {
             cachedIterator = box.iterator();
         }
-    
-        int maxExecs = getMaxExecutions();
+
         int timeLimit = getIterationTimeLimit();
         int execCount = 0;
     
