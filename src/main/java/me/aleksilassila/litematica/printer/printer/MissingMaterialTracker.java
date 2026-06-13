@@ -30,7 +30,6 @@ public class MissingMaterialTracker {
     }
 
     private final Map<Item, Entry> missingMap = new ConcurrentHashMap<>();
-    @Getter
     private int generation = 0;
 
     public static MissingMaterialTracker getInstance() {
