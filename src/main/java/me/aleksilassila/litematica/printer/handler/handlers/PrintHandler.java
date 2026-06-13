@@ -119,6 +119,9 @@ public class PrintHandler extends ClientPlayerTickHandler {
 
     @Override
     protected void executeIteration(BlockPos blockPos, AtomicReference<Boolean> skipIteration) {
+        if (BreakUtils.INSTANCE.isRecentlyBroken(blockPos)) {
+            return;
+        }
         if (Configs.Placement.FALLING_CHECK.getBooleanValue()
                 && ctx.requiredState.getBlock() instanceof FallingBlock) {
             BlockPos downPos = blockPos.below();
@@ -156,13 +159,14 @@ public class PrintHandler extends ClientPlayerTickHandler {
         if (action.getShift() == null) {
             useShift =
                     (Implementation.isInteractive(
-                                            level.getBlockState(blockPos.relative(side)).getBlock())
-                                    && !(action instanceof ClickAction))
+                            level.getBlockState(blockPos.relative(side)).getBlock())
+                            && !(action instanceof ClickAction))
                             || Configs.Print.PRINT_FORCED_SNEAK.getBooleanValue();
         } else {
             useShift = action.getShift();
         }
         action.queueAction(blockPos, side, useShift, player);
+        didWorkThisTick = true;
         Vec3 hitModifier = LitematicaUtils.usePrecisionPlacement(blockPos, ctx.requiredState);
         if (hitModifier != null) {
             ActionManager.INSTANCE.hitModifier = hitModifier;
