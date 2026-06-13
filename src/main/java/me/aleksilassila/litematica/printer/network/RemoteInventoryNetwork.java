@@ -5,6 +5,7 @@ import lombok.Setter;
 import me.aleksilassila.litematica.printer.Reference;
 import me.aleksilassila.litematica.printer.enums.RemoteResultType;
 import me.aleksilassila.litematica.printer.network.payload.RemoteExchangePayload;
+import me.aleksilassila.litematica.printer.network.payload.RemoteExchangeResultPayload;
 import me.aleksilassila.litematica.printer.network.payload.ScanContainerPayload;
 import me.aleksilassila.litematica.printer.network.payload.ScanContainerResultPayload;
 import net.fabricmc.api.EnvType;
