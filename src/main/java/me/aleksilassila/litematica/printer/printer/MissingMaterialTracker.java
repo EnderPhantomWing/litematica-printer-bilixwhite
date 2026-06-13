@@ -1,5 +1,6 @@
 package me.aleksilassila.litematica.printer.printer;
 
+import lombok.Getter;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
@@ -29,6 +30,7 @@ public class MissingMaterialTracker {
     }
 
     private final Map<Item, Entry> missingMap = new ConcurrentHashMap<>();
+    @Getter
     private int generation = 0;
 
     public static MissingMaterialTracker getInstance() {
@@ -66,6 +68,10 @@ public class MissingMaterialTracker {
 
     public int size() {
         return missingMap.size();
+    }
+
+    public int getGeneration() {
+        return generation;
     }
 
     public void reset() {
