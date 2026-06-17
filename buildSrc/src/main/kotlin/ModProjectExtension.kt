@@ -82,7 +82,7 @@ private fun getFullProjectVersion(mcVersion: String?, modVersion: String): Strin
         isRelease -> "$modVersion-mc$mcVersion-$commitHash-$commitCount-release"
         isCi -> {
             if (buildNumber != null) {
-                "$modVersion-mc$mcVersion-$commitHash-$commitCount-build.$buildNumber"
+                "$modVersion-mc$mcVersion-$commitHash-$commitCount-ci"
             } else {
                 "$modVersion-mc$mcVersion-$timestampMillis-development"
             }
