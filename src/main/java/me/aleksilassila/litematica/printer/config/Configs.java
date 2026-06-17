@@ -196,6 +196,18 @@ public class Configs extends ConfigBuilders implements IConfigHandler {
                 .defaultValue(false)
                 .build();
 
+        // 惰性扫描 - 进入惰性的空闲 tick 数（0=禁用惰性）
+        public static final ConfigInteger LAZY_ENTER_TICKS = integerValue("lazyEnterTicks")
+                .defaultValue(100)
+                .range(0, 1000)
+                .build();
+
+        // 惰性扫描 - 唤醒时触发的脏区域阈值（低于此值做 PARTIAL 重扫，否则 FULL 重扫）
+        public static final ConfigInteger LAZY_DIRTY_WAKE_THRESHOLD = integerValue("lazyDirtyWakeThreshold")
+                .defaultValue(5)
+                .range(0, 100)
+                .build();
+
         // 通用配置项列表（按功能分类排序）
         public static final ImmutableList<IConfigBase> OPTIONS = ImmutableList.of(
                 WORK_SWITCH,
@@ -219,7 +231,9 @@ public class Configs extends ConfigBuilders implements IConfigHandler {
                 Z_REVERSE,
                 AUTO_DISABLE_PRINTER,
                 UPDATE_CHECK,
-                DEBUG_OUTPUT
+                DEBUG_OUTPUT,
+                LAZY_ENTER_TICKS,
+                LAZY_DIRTY_WAKE_THRESHOLD
         );
     }
 
@@ -466,10 +480,22 @@ public class Configs extends ConfigBuilders implements IConfigHandler {
                 .range(0, 20)
                 .build();
 
-        // 有序存放
-        public static final ConfigBoolean STORE_ORDERLY = booleanValue("storeOrderly")
-                .defaultValue(false)
+        // 背包满时有序放回潜影盒
+        public static final ConfigBoolean RETURN_TO_SHULKER_WHEN_FULL = booleanValue("returnToShulkerWhenFull")
+                .defaultValue(true)
                 .build();
+
+        // 背包满时有序放回远程容器
+        public static final ConfigBoolean RETURN_TO_CONTAINER_WHEN_FULL = booleanValue("returnToContainerWhenFull")
+                .defaultValue(true)
+                .build();
+
+        // 远程容器回塞节流（tick）
+        public static final ConfigInteger CONTAINER_RETURN_INTERVAL = integerValue("containerReturnInterval")
+                .defaultValue(60)
+                .range(1, 200)
+                .build();
+
 
         public static final ImmutableList<IConfigBase> OPTIONS = ImmutableList.of(
                 PRINT_SELECTION_TYPE,
@@ -498,7 +524,9 @@ public class Configs extends ConfigBuilders implements IConfigHandler {
                 USE_QUICK_SHULKER,
                 SHULKER_SOURCE,
                 SHULKER_COOLDOWN,
-                STORE_ORDERLY
+                RETURN_TO_SHULKER_WHEN_FULL,
+                RETURN_TO_CONTAINER_WHEN_FULL,
+                CONTAINER_RETURN_INTERVAL
         );
     }
 

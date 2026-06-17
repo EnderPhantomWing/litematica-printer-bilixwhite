@@ -161,9 +161,12 @@ public class BreakUtils {
                         ModUtils.trySwitchToEffectiveTool(pos);
                     }
                 }
-                if (continueDestroyBlock(pos, Direction.DOWN) == BlockBreakResult.IN_PROGRESS) {
+                BlockBreakResult breakResult = continueDestroyBlock(pos, Direction.DOWN);
+                if (breakResult == BlockBreakResult.IN_PROGRESS) {
                     breakPos = pos;
                     break;
+                } else if (breakResult == BlockBreakResult.COMPLETED) {
+                    recentlyBroken.put(pos, 4);
                 }
             }
         } else if (continueDestroyBlock(breakPos, Direction.DOWN) != BlockBreakResult.IN_PROGRESS) {

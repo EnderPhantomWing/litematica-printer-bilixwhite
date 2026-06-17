@@ -52,17 +52,26 @@ val Project.javaVersion
     }
 val Project.mixinJavaVersion get() = "JAVA_${javaVersion}"
 
-fun String.removeBuildSuffix(): String {
-    // 匹配三种模式并移除（从末尾匹配）
-    val regex = Regex("""-(?:[A-Za-z0-9]+-(?:release|\d+)|development)$""")
-    return this.replace(regex, "")
-}
-
-val Project.fullProjectMavenVersion: String get() = fullProjectVersion.removeBuildSuffix()
 val Project.fullProjectVersionName: String get() = "v$fullProjectVersion"
 val Project.fullProjectVersion: String get() = getFullProjectVersion(mcVersion, modVersion)
 
+private fun getCommitCountNumber(workDir: File = File(".")): Int? {
+    return try {
+        val process = ProcessBuilder("git", "rev-list", "--count", "HEAD")
+            .directory(workDir)
+            .redirectErrorStream(true)
+            .start()
+        val output = process.inputStream.bufferedReader().readText().trim()
+        val exitCode = process.waitFor()
+        if (exitCode == 0) output.toInt() else null
+    } catch (e: Exception) {
+        e.printStackTrace()
+        null
+    }
+}
+
 private fun getFullProjectVersion(mcVersion: String?, modVersion: String): String {
+    val commitCount     = getCommitCountNumber()
     val buildNumber     = System.getenv("GITHUB_RUN_NUMBER")
     val commitHash      = System.getenv("COMMIT_HASH")
     val isCi            = System.getenv("CI") == "true" || System.getenv("GITHUB_ACTIONS") == "true"
@@ -70,10 +79,10 @@ private fun getFullProjectVersion(mcVersion: String?, modVersion: String): Strin
     val timestampMillis = System.currentTimeMillis()
 
     return when {
-        isRelease -> "$modVersion-mc$mcVersion-$commitHash-release"
+        isRelease -> "$modVersion-mc$mcVersion-$commitHash-$commitCount-release"
         isCi -> {
             if (buildNumber != null) {
-                "$modVersion-mc$mcVersion-$commitHash-$buildNumber"
+                "$modVersion-mc$mcVersion-$commitHash-$commitCount-build.$buildNumber"
             } else {
                 "$modVersion-mc$mcVersion-$timestampMillis-development"
             }

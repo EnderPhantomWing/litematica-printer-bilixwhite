@@ -42,6 +42,10 @@ dependencies {
     implementation("com.terraformersmc:modmenu:${prop("modmenu")}")
 
     // Masa
+    // dev only
+    // implementation("com.github.sakura-ryoko:malilib:${prop("malilib_dev")}")
+    // implementation("com.github.sakura-ryoko:litematica:${prop("litematica_dev")}")
+    // implementation("com.github.sakura-ryoko:tweakeroo:${prop("tweakeroo_dev")}")
     implementation("fi.dy.masa.malilib:${prop("malilib")}")
     implementation("fi.dy.masa.litematica:${prop("litematica")}")
     implementation("fi.dy.masa.tweakeroo:${prop("tweakeroo")}")
@@ -67,10 +71,10 @@ loom {
     val programArgs = listOf("--width", "1280", "--height", "720", "--username", "PrinterTest")
     runs {
         named("client") {
-            ideConfigGenerated(true)
-            vmArgs(commonVmArgs)
-            programArgs(programArgs)
-            runDir = "../../run/client"
+            generateRunConfig
+            jvmArguments.set(commonVmArgs)
+            programArguments.set(programArgs)
+            runDirectory.dir("../../run/client")
         }
     }
 }

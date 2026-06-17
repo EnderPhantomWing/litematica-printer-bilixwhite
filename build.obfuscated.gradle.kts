@@ -1,7 +1,5 @@
 @file:Suppress("UnstableApiUsage")
 
-import groovy.json.JsonSlurper
-
 plugins {
     id("mod-plugin")
     id("maven-publish")
@@ -70,11 +68,6 @@ dependencies {
                 modImplementation(files(quickshulkerFile))
             }
         }
-        if (mcVersionInt == 12006) {  // 1.20.6 是 Haocen2004/quickshulker 分支, 所以还是使用之前老版本的依赖
-            modImplementation("net.kyrptonaught:kyrptconfig:${prop("kyrptconfig")}")
-        } else {
-            modImplementation("me.fallenbreath:conditional-mixin-fabric:0.6.4")
-        }
     } else {
         modImplementation("curse.maven:quick-shulker-362669:${prop("quick_shulker")}")
         modImplementation("net.kyrptonaught:kyrptconfig:${prop("kyrptconfig")}")
@@ -89,32 +82,13 @@ if (System.getenv("JITPACK") == "true") {
 
 loom {
     val commonVmArgs = listOf("-Dmixin.debug.export=true", "-Dmixin.debug.verbose=true", "-Dmixin.env.remapRefMap=true")
-    var programArgs = listOf("--width", "1280", "--height", "720")
-    val profileFile = file("../../profile.json")
-    if (profileFile.exists()) {
-        @Suppress("UNCHECKED_CAST")
-        val profile = JsonSlurper().parseText(profileFile.readText()) as Map<String, List<String>>
-        val username = profile["username"].toString()
-        val uuid = profile["uuid"].toString()
-        val xuid = profile["xuid"].toString()
-        val accessToken = profile["accessToken"].toString()
-        programArgs = programArgs + listOf(
-            "--username", username,
-            "--uuid", uuid,
-            "--xuid", xuid,
-            "--accessToken", accessToken,
-            "--userType", "msa",
-            "--versionType", "release"
-        )
-    } else {
-        programArgs = programArgs + listOf("--username", "PrinterTest")
-    }
+    val programArgs = listOf("--width", "1280", "--height", "720", "--username", "PrinterTest")
     runs {
         named("client") {
-            ideConfigGenerated(true)
-            vmArgs(commonVmArgs)
-            programArgs(programArgs)
-            runDir = "../../run/client"
+            generateRunConfig
+            jvmArguments.set(commonVmArgs)
+            programArguments.set(programArgs)
+            runDirectory.dir("../../run/client")
         }
     }
 }

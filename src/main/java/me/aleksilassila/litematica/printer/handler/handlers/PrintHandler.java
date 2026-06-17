@@ -76,13 +76,14 @@ public class PrintHandler extends ClientPlayerTickHandler {
         WorldSchematic schematic = SchematicWorldHandler.getSchematicWorld();
         if (schematic == null) return false;
 
-        // Fast path: read states once, skip air and already-correct positions
-        // without allocating SchematicBlockContext or running expensive PlacementGuide logic.
         BlockState required = schematic.getBlockState(blockPos);
-        if (required.isAir()) return false;
         BlockState current = level.getBlockState(blockPos);
-        // Block state objects are singletons in Minecraft — identity check is safe and O(1)
-        if (required == current) return false;
+
+        if (required.isAir()) {
+            if (!Configs.Print.BREAK_EXTRA_BLOCK.getBooleanValue() || current.isAir()) return false;
+        } else if (required == current) {
+            return false;
+        }
 
         this.ctx = new SchematicBlockContext(client, level, schematic, blockPos, current, required);
 
@@ -118,6 +119,9 @@ public class PrintHandler extends ClientPlayerTickHandler {
 
     @Override
     protected void executeIteration(BlockPos blockPos, AtomicReference<Boolean> skipIteration) {
+        if (BreakUtils.INSTANCE.isRecentlyBroken(blockPos)) {
+            return;
+        }
         if (Configs.Placement.FALLING_CHECK.getBooleanValue()
                 && ctx.requiredState.getBlock() instanceof FallingBlock) {
             BlockPos downPos = blockPos.below();
@@ -132,18 +136,21 @@ public class PrintHandler extends ClientPlayerTickHandler {
                 return;
             }
         }
+        Item[] reqItems = action.getRequiredItems(ctx.requiredState.getBlock());
+        if (RemoteContainerUtils.hasPendingExchange()) {
+            recordMissingMaterial(reqItems);
+            setCooldown(blockPos, ConfigUtils.getPlaceCooldown());
+            return;
+        }
         Direction side = action.getValidSide(level, blockPos);
         if (side == null) return;
-        Item[] reqItems = action.getRequiredItems(ctx.requiredState.getBlock());
         if (!InventoryUtils.switchToItems(player, reqItems)) {
             setCooldown(blockPos, ConfigUtils.getPlaceCooldown());
-            if (reqItems != null && reqItems.length > 0 && reqItems[0] != null) {
-                if (Configs.Print.USE_REMOTE_CONTAINER.getBooleanValue()
-                        && RemoteContainerUtils.tryGetItemFromContainers(reqItems[0])) {
-                } else {
-                    MissingMaterialTracker.getInstance()
-                            .recordMissing(reqItems[0], ctx.getRequiredBlockName());
-                }
+            recordMissingMaterial(reqItems);
+            if (reqItems != null && reqItems.length > 0 && reqItems[0] != null
+                    && !QuickShulkerUtils.isOpenHandler()
+                    && Configs.Print.USE_REMOTE_CONTAINER.getBooleanValue()) {
+                RemoteContainerUtils.tryGetItemFromContainers(reqItems[0]);
             }
             return;
         }
@@ -151,13 +158,14 @@ public class PrintHandler extends ClientPlayerTickHandler {
         if (action.getShift() == null) {
             useShift =
                     (Implementation.isInteractive(
-                                            level.getBlockState(blockPos.relative(side)).getBlock())
-                                    && !(action instanceof ClickAction))
+                            level.getBlockState(blockPos.relative(side)).getBlock())
+                            && !(action instanceof ClickAction))
                             || Configs.Print.PRINT_FORCED_SNEAK.getBooleanValue();
         } else {
             useShift = action.getShift();
         }
         action.queueAction(blockPos, side, useShift, player);
+        didWorkThisTick = true;
         Vec3 hitModifier = LitematicaUtils.usePrecisionPlacement(blockPos, ctx.requiredState);
         if (hitModifier != null) {
             ActionManager.INSTANCE.hitModifier = hitModifier;
@@ -170,5 +178,12 @@ public class PrintHandler extends ClientPlayerTickHandler {
             skipIteration.set(true);
         }
         setCooldown(blockPos, ConfigUtils.getPlaceCooldown());
+    }
+
+    private void recordMissingMaterial(Item[] reqItems) {
+        if (reqItems != null && reqItems.length > 0 && reqItems[0] != null) {
+            MissingMaterialTracker.getInstance()
+                    .recordMissing(reqItems[0], ctx.getRequiredBlockName());
+        }
     }
 }

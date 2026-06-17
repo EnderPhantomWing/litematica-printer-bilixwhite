@@ -216,8 +216,12 @@
   "litematica-printer.config.selectionType.litematica.selection": "投影选区",
   "litematica-printer.config.selectionType.litematica.selection.abovePlayer": "投影选区(玩家之上)",
   "litematica-printer.config.selectionType.litematica.selection.belowPlayer": "投影选区(玩家之下)",
-  "litematica-printer.config.storeOrderly": "物品有序存放",
-  "litematica-printer.config.storeOrderly.desc": "背包满时，将手持物品放回原位后再取新物品。",
+  "litematica-printer.config.returnToShulkerWhenFull": "背包满时有序放回潜影盒",
+  "litematica-printer.config.returnToShulkerWhenFull.desc": "背包满时，将手持物品放回潜影盒槽位后再取新物品。",
+  "litematica-printer.config.returnToContainerWhenFull": "远程材料背包满时放回容器",
+  "litematica-printer.config.returnToContainerWhenFull.desc": "背包满时，将最早的远程容器取出物品塞回其来源容器以腾出空间。",
+  "litematica-printer.config.containerReturnInterval": "回塞冷却间隔",
+  "litematica-printer.config.containerReturnInterval.desc": "回塞操作之间的冷却时间（游戏刻）。较高值减少网络开销但增加回塞延迟。",
   "litematica-printer.config.switchPrinterMode": "切换模式",
   "litematica-printer.config.switchPrinterMode.desc": "切换打印机的当前工作模式(打印/挖掘/破基岩等)。",
   "litematica-printer.config.syncInventory": "同步容器 - 热键",
@@ -260,5 +264,9 @@
   "litematica-printer.config.shulkerSource.mod": "模组（Quick Shulker）",
   "litematica-printer.config.shulkerSource.plugin": "插件（AxShulkers）",
   "litematica-printer.config.shulkerCooldown": "潜影盒冷却",
-  "litematica-printer.config.shulkerCooldown.desc": "两次打开潜影盒之间的冷却时间（游戏刻）。范围：0-20。"
+  "litematica-printer.config.shulkerCooldown.desc": "两次打开潜影盒之间的冷却时间（游戏刻）。范围：0-20。",
+  "litematica-printer.config.lazyEnterTicks": "惰性进入间隔",
+  "litematica-printer.config.lazyEnterTicks.desc": "进入惰性扫描模式前的空闲 tick 数（跳过全量迭代扫描）。\n设为 0 彻底禁用惰性模式。",
+  "litematica-printer.config.lazyDirtyWakeThreshold": "惰性唤醒脏区域阈值",
+  "litematica-printer.config.lazyDirtyWakeThreshold.desc": "从惰性模式唤醒时，若脏子区块数量低于此值，只扫描脏子区块（PARTIAL）；高于此值则全量重扫（FULL）。\n设为 0 始终全量重扫。"
 }
