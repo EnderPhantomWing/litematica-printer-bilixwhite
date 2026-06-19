@@ -1,6 +1,7 @@
 package me.aleksilassila.litematica.printer.handler.handlers;
 
 import me.aleksilassila.litematica.printer.I18n;
+import me.aleksilassila.litematica.printer.enums.HighlightType;
 import me.aleksilassila.litematica.printer.utils.ModUtils;
 import me.aleksilassila.litematica.printer.config.Configs;
 import me.aleksilassila.litematica.printer.enums.PrintModeType;
@@ -49,6 +50,7 @@ public class BedrockHandler extends ClientPlayerTickHandler {
     protected void executeIteration(BlockPos blockPos, AtomicReference<Boolean> skipIteration) {
         BedrockUtils.addToBreakList(blockPos, client.level);
         didWorkThisTick = true;
+        addHighlight(blockPos, HighlightType.BREAK);
         setCooldown(blockPos, 100);
     }
 }
