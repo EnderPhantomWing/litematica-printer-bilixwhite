@@ -128,7 +128,6 @@ public class BlockHighlightRenderer implements IRenderer {
         colors[2] = extractArgb(Configs.Highlight.HIGHLIGHT_COLOR_BREAK.getIntegerValue());
         colors[3] = extractArgb(Configs.Highlight.HIGHLIGHT_COLOR_FAILED.getIntegerValue());
 
-        double expand = 0.005;
         List<HighlightEntry> entries = new ArrayList<>();
 
         for (ClientPlayerTickHandler handler : ClientPlayerTickManager.VALUES) {
@@ -169,18 +168,18 @@ public class BlockHighlightRenderer implements IRenderer {
         }
 
         //#if MC >= 12105
-        drawWithMaLiLib(cameraPos, entries, expand, seeThrough, hasOutline, hasFilled);
+        drawWithMaLiLib(cameraPos, entries, seeThrough, hasOutline, hasFilled);
         //#elseif MC >= 12101
-        //$$ drawDirect(cameraPos, entries, expand, seeThrough, hasOutline, hasFilled);
+        //$$ drawDirect(cameraPos, entries, seeThrough, hasOutline, hasFilled);
         //#else
-        //$$ drawLegacy(cameraPos, entries, expand, seeThrough, hasOutline, hasFilled);
+        //$$ drawLegacy(cameraPos, entries, seeThrough, hasOutline, hasFilled);
         //#endif
     }
 
     // ===== Modern path: MC >= 1.21.5 (MaLiLibPipelines + RenderContext) =====
 
     //#if MC >= 12105
-    private void drawWithMaLiLib(Vec3 cameraPos, List<HighlightEntry> entries, double expand,
+    private void drawWithMaLiLib(Vec3 cameraPos, List<HighlightEntry> entries,
                                  boolean seeThrough, boolean hasOutline, boolean hasFilled) {
         RenderPipeline linePipeline = seeThrough
                 ? MaLiLibPipelines.DEBUG_LINES_MASA_SIMPLE_NO_DEPTH_NO_CULL
@@ -200,64 +199,64 @@ public class BlockHighlightRenderer implements IRenderer {
         //#elseif MC >= 12105 && MC < 12108
         //$$ RenderContext ctx = new RenderContext(linePipeline);
         //#else
-        RenderContext ctx = new RenderContext(() -> "litematica_printer:highlight", linePipeline);
         //#endif
-        try {
-            if (hasOutline) {
-                //#if MC >= 260200
-                //$$ ctx.start(() -> "highlight_outline", linePipeline, 0);
-                //#elseif MC >= 12108
-                //$$ ctx.start(() -> "highlight_outline", linePipeline);
-                //#else
-                // BufferBuilder already set in constructor
-                //#endif
-                BufferBuilder lineBuf = ctx.getBuilder();
-                for (HighlightEntry e : entries) {
-                    if (e.style == HighlightStyleType.FILLED) continue;
-                    addOutlineBoxLines(lineBuf, e.pos, expand, e.r, e.g, e.b, (int)(e.alpha * 255), cameraPos);
+        try (RenderContext ctx = new RenderContext(() -> "litematica_printer:highlight", linePipeline)) {
+            try {
+                if (hasOutline) {
+                    //#if MC >= 260200
+                    //$$ ctx.start(() -> "highlight_outline", linePipeline, 0);
+                    //#elseif MC >= 12108
+                    //$$ ctx.start(() -> "highlight_outline", linePipeline);
+                    //#else
+                    // BufferBuilder already set in constructor
+                    //#endif
+                    BufferBuilder lineBuf = ctx.getBuilder();
+                    for (HighlightEntry e : entries) {
+                        if (e.style == HighlightStyleType.FILLED) continue;
+                        addOutlineBoxLines(lineBuf, e.pos, e.r, e.g, e.b, (int) (e.alpha * 255), cameraPos);
+                    }
+                    MeshData mesh = lineBuf.build();
+                    if (mesh != null) {
+                        ctx.draw(mesh, false, true);
+                        mesh.close();
+                    }
+                    ctx.reset();
                 }
-                MeshData mesh = lineBuf.build();
-                if (mesh != null) {
-                    ctx.draw(mesh, false, true);
-                    mesh.close();
-                }
-                ctx.reset();
-            }
 
-            if (hasFilled) {
-                //#if MC >= 260200
-                //$$ BufferBuilder filledBuf = ctx.start(() -> "highlight_filled", filledPipeline, 0);
-                //#elseif MC >= 12108
-                BufferBuilder filledBuf = ctx.start(() -> "highlight_filled", filledPipeline);
-                //#else
-                //$$ BufferBuilder filledBuf = ctx.start(filledPipeline);
-                //#endif
-                for (HighlightEntry e : entries) {
-                    if (e.style == HighlightStyleType.OUTLINE) continue;
-                    addFilledBoxModern(filledBuf, e.pos, expand, e.r, e.g, e.b, (int)(e.alpha * 255), cameraPos);
+                if (hasFilled) {
+                    //#if MC >= 260200
+                    //$$ BufferBuilder filledBuf = ctx.start(() -> "highlight_filled", filledPipeline, 0);
+                    //#elseif MC >= 12108
+                    BufferBuilder filledBuf = ctx.start(() -> "highlight_filled", filledPipeline);
+                    //#else
+                    //$$ BufferBuilder filledBuf = ctx.start(filledPipeline);
+                    //#endif
+                    for (HighlightEntry e : entries) {
+                        if (e.style == HighlightStyleType.OUTLINE) continue;
+                        addFilledBoxModern(filledBuf, e.pos, e.r, e.g, e.b, (int) (e.alpha * 255), cameraPos);
+                    }
+                    MeshData mesh = filledBuf.build();
+                    if (mesh != null) {
+                        ctx.draw(mesh, false, false);
+                        mesh.close();
+                    }
+                    ctx.reset();
                 }
-                MeshData mesh = filledBuf.build();
-                if (mesh != null) {
-                    ctx.draw(mesh, false, false);
-                    mesh.close();
-                }
-                ctx.reset();
+            } catch (Exception e) {
+                Reference.LOGGER.error("BlockHighlight: drawWithMaLiLib exception: {}", e.getMessage());
             }
-        } catch (Exception e) {
-            Reference.LOGGER.error("BlockHighlight: drawWithMaLiLib exception: {}", e.getMessage());
-        } finally {
-            try { ctx.close(); } catch (Exception ignored) {}
+        } catch (Exception ignored) {
         }
     }
 
-    private void addFilledBoxModern(BufferBuilder buf, BlockPos pos, double expand,
+    private void addFilledBoxModern(BufferBuilder buf, BlockPos pos,
                                     int r, int g, int b, int a, Vec3 cameraPos) {
-        float x1 = (float) (pos.getX() - cameraPos.x - expand);
-        float y1 = (float) (pos.getY() - cameraPos.y - expand);
-        float z1 = (float) (pos.getZ() - cameraPos.z - expand);
-        float x2 = (float) (pos.getX() - cameraPos.x + 1 + expand);
-        float y2 = (float) (pos.getY() - cameraPos.y + 1 + expand);
-        float z2 = (float) (pos.getZ() - cameraPos.z + 1 + expand);
+        float x1 = (float) (pos.getX() - cameraPos.x - 0.001);
+        float y1 = (float) (pos.getY() - cameraPos.y - 0.001 );
+        float z1 = (float) (pos.getZ() - cameraPos.z - 0.001 );
+        float x2 = (float) (pos.getX() - cameraPos.x + 1 + 0.001);
+        float y2 = (float) (pos.getY() - cameraPos.y + 1 + 0.001);
+        float z2 = (float) (pos.getZ() - cameraPos.z + 1 + 0.001);
 
         quadModern(buf, x1, y1, z1, x2, y1, z1, x2, y1, z2, x1, y1, z2, r, g, b, a);
         quadModern(buf, x1, y2, z1, x1, y2, z2, x2, y2, z2, x2, y2, z1, r, g, b, a);
@@ -276,14 +275,14 @@ public class BlockHighlightRenderer implements IRenderer {
         buf.addVertex(x4, y4, z4).setColor(r, g, b, a);
     }
 
-    private void addOutlineBoxLines(BufferBuilder buf, BlockPos pos, double expand,
+    private void addOutlineBoxLines(BufferBuilder buf, BlockPos pos,
                                     int r, int g, int b, int a, Vec3 cameraPos) {
-        float x1 = (float) (pos.getX() - cameraPos.x - expand);
-        float y1 = (float) (pos.getY() - cameraPos.y - expand);
-        float z1 = (float) (pos.getZ() - cameraPos.z - expand);
-        float x2 = (float) (pos.getX() - cameraPos.x + 1 + expand);
-        float y2 = (float) (pos.getY() - cameraPos.y + 1 + expand);
-        float z2 = (float) (pos.getZ() - cameraPos.z + 1 + expand);
+        float x1 = (float) (pos.getX() - cameraPos.x );
+        float y1 = (float) (pos.getY() - cameraPos.y );
+        float z1 = (float) (pos.getZ() - cameraPos.z );
+        float x2 = (float) (pos.getX() - cameraPos.x + 1 );
+        float y2 = (float) (pos.getY() - cameraPos.y + 1 );
+        float z2 = (float) (pos.getZ() - cameraPos.z + 1 );
 
         line(buf, x1, y1, z1, x2, y1, z1, r, g, b, a);
         line(buf, x2, y1, z1, x2, y1, z2, r, g, b, a);
@@ -317,15 +316,15 @@ public class BlockHighlightRenderer implements IRenderer {
     // ===== Intermediate path: MC >= 1.21.1 && < 1.21.5 (direct BufferUploader) =====
 
     //#if MC >= 12101 && MC < 12105
-    //$$ private void drawDirect(Vec3 cameraPos, List<HighlightEntry> entries, double expand,
+    //$$ private void drawDirect(Vec3 cameraPos, List<HighlightEntry> entries,
     //$$                         boolean seeThrough, boolean hasOutline, boolean hasFilled) {
     //$$
     //$$     try {
     //$$         if (hasOutline) {
-    //$$             BufferBuilder buf = Tesselator.getInstance().begin(VertexFormat.Mode.LINES, DefaultVertexFormat.POSITION_COLOR);
+    //$$             BufferBuilder buf = Tesselator.getInstance().begin(VertexFormat.Mode.DEBUG_LINES, DefaultVertexFormat.POSITION_COLOR);
     //$$             for (HighlightEntry e : entries) {
     //$$                 if (e.style == HighlightStyleType.FILLED) continue;
-    //$$                 addOutlineBoxDirect(buf, e.pos, expand, e.r, e.g, e.b, (int)(e.alpha * 255), cameraPos);
+    //$$                 addOutlineBoxDirect(buf, e.pos, e.r, e.g, e.b, (int)(e.alpha * 255), cameraPos);
     //$$             }
     //$$             MeshData mesh = buf.build();
     //$$             if (mesh != null) {
@@ -343,7 +342,7 @@ public class BlockHighlightRenderer implements IRenderer {
     //$$             BufferBuilder buf = Tesselator.getInstance().begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION_COLOR);
     //$$             for (HighlightEntry e : entries) {
     //$$                 if (e.style == HighlightStyleType.OUTLINE) continue;
-    //$$                 addFilledBoxDirect(buf, e.pos, expand, e.r, e.g, e.b, (int)(e.alpha * 255), cameraPos);
+    //$$                 addFilledBoxDirect(buf, e.pos, e.r, e.g, e.b, (int)(e.alpha * 255), cameraPos);
     //$$             }
     //$$             MeshData mesh = buf.build();
     //$$             if (mesh != null) {
@@ -361,14 +360,14 @@ public class BlockHighlightRenderer implements IRenderer {
     //$$     }
     //$$ }
     //$$
-    //$$ private void addFilledBoxDirect(BufferBuilder buf, BlockPos pos, double expand,
+    //$$ private void addFilledBoxDirect(BufferBuilder buf, BlockPos pos,
     //$$                                 int r, int g, int b, int a, Vec3 cameraPos) {
-    //$$     float x1 = (float) (pos.getX() - cameraPos.x - expand);
-    //$$     float y1 = (float) (pos.getY() - cameraPos.y - expand);
-    //$$     float z1 = (float) (pos.getZ() - cameraPos.z - expand);
-    //$$     float x2 = (float) (pos.getX() - cameraPos.x + 1 + expand);
-    //$$     float y2 = (float) (pos.getY() - cameraPos.y + 1 + expand);
-    //$$     float z2 = (float) (pos.getZ() - cameraPos.z + 1 + expand);
+    //$$     float x1 = (float) (pos.getX() - cameraPos.x - 0.001);
+    //$$     float y1 = (float) (pos.getY() - cameraPos.y - 0.001);
+    //$$     float z1 = (float) (pos.getZ() - cameraPos.z - 0.001);
+    //$$     float x2 = (float) (pos.getX() - cameraPos.x + 1 + 0.001);
+    //$$     float y2 = (float) (pos.getY() - cameraPos.y + 1 + 0.001);
+    //$$     float z2 = (float) (pos.getZ() - cameraPos.z + 1 + 0.001);
     //$$
     //$$     triDirect(buf, x1, y1, z1, x2, y1, z1, x2, y1, z2, r, g, b, a);
     //$$     triDirect(buf, x1, y1, z1, x2, y1, z2, x1, y1, z2, r, g, b, a);
@@ -392,14 +391,14 @@ public class BlockHighlightRenderer implements IRenderer {
     //$$     buf.addVertex(x3, y3, z3).setColor(r, g, b, a);
     //$$ }
     //$$
-    //$$ private void addOutlineBoxDirect(BufferBuilder buf, BlockPos pos, double expand,
+    //$$ private void addOutlineBoxDirect(BufferBuilder buf, BlockPos pos,
     //$$                                  int r, int g, int b, int a, Vec3 cameraPos) {
-    //$$     float x1 = (float) (pos.getX() - cameraPos.x - expand);
-    //$$     float y1 = (float) (pos.getY() - cameraPos.y - expand);
-    //$$     float z1 = (float) (pos.getZ() - cameraPos.z - expand);
-    //$$     float x2 = (float) (pos.getX() - cameraPos.x + 1 + expand);
-    //$$     float y2 = (float) (pos.getY() - cameraPos.y + 1 + expand);
-    //$$     float z2 = (float) (pos.getZ() - cameraPos.z + 1 + expand);
+    //$$     float x1 = (float) (pos.getX() - cameraPos.x );
+    //$$     float y1 = (float) (pos.getY() - cameraPos.y );
+    //$$     float z1 = (float) (pos.getZ() - cameraPos.z );
+    //$$     float x2 = (float) (pos.getX() - cameraPos.x + 1 );
+    //$$     float y2 = (float) (pos.getY() - cameraPos.y + 1 );
+    //$$     float z2 = (float) (pos.getZ() - cameraPos.z + 1 );
     //$$
     //$$     edge3Direct(buf, x1, y1, z1, x2, y1, z1, r, g, b, a);
     //$$     edge3Direct(buf, x2, y1, z1, x2, y1, z2, r, g, b, a);
@@ -425,7 +424,7 @@ public class BlockHighlightRenderer implements IRenderer {
     // ===== Legacy path: MC < 1.21.1 (old Tesselator API) =====
 
     //#if MC < 12101
-    //$$ private void drawLegacy(Vec3 cameraPos, List<HighlightEntry> entries, double expand,
+    //$$ private void drawLegacy(Vec3 cameraPos, List<HighlightEntry> entries,
     //$$                         boolean seeThrough, boolean hasOutline, boolean hasFilled) {
     //$$
     //$$     Tesselator tesselator = Tesselator.getInstance();
@@ -433,10 +432,10 @@ public class BlockHighlightRenderer implements IRenderer {
     //$$
     //$$     try {
     //$$         if (hasOutline) {
-    //$$             buf.begin(VertexFormat.Mode.LINES, DefaultVertexFormat.POSITION_COLOR);
+    //$$             buf.begin(VertexFormat.Mode.DEBUG_LINES, DefaultVertexFormat.POSITION_COLOR);
     //$$             for (HighlightEntry e : entries) {
     //$$                 if (e.style == HighlightStyleType.FILLED) continue;
-    //$$                 addOutlineBoxLegacy(buf, e.pos, expand, e.r, e.g, e.b, (int)(e.alpha * 255), cameraPos);
+    //$$                 addOutlineBoxLegacy(buf, e.pos, e.r, e.g, e.b, (int)(e.alpha * 255), cameraPos);
     //$$             }
     //$$             if (seeThrough) RenderSystem.disableDepthTest();
     //$$             RenderSystem.enableBlend();
@@ -450,7 +449,7 @@ public class BlockHighlightRenderer implements IRenderer {
     //$$             buf.begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION_COLOR);
     //$$             for (HighlightEntry e : entries) {
     //$$                 if (e.style == HighlightStyleType.OUTLINE) continue;
-    //$$                 addFilledBoxLegacy(buf, e.pos, expand, e.r, e.g, e.b, (int)(e.alpha * 255), cameraPos);
+    //$$                 addFilledBoxLegacy(buf, e.pos, e.r, e.g, e.b, (int)(e.alpha * 255), cameraPos);
     //$$             }
     //$$             if (seeThrough) RenderSystem.disableDepthTest();
     //$$             RenderSystem.enableBlend();
@@ -464,14 +463,14 @@ public class BlockHighlightRenderer implements IRenderer {
     //$$     }
     //$$ }
     //$$
-    //$$ private void addFilledBoxLegacy(BufferBuilder buf, BlockPos pos, double expand,
+    //$$ private void addFilledBoxLegacy(BufferBuilder buf, BlockPos pos,
     //$$                                 int r, int g, int b, int a, Vec3 cameraPos) {
-    //$$     float x1 = (float) (pos.getX() - cameraPos.x - expand);
-    //$$     float y1 = (float) (pos.getY() - cameraPos.y - expand);
-    //$$     float z1 = (float) (pos.getZ() - cameraPos.z - expand);
-    //$$     float x2 = (float) (pos.getX() - cameraPos.x + 1 + expand);
-    //$$     float y2 = (float) (pos.getY() - cameraPos.y + 1 + expand);
-    //$$     float z2 = (float) (pos.getZ() - cameraPos.z + 1 + expand);
+    //$$     float x1 = (float) (pos.getX() - cameraPos.x - 0.001);
+    //$$     float y1 = (float) (pos.getY() - cameraPos.y - 0.001);
+    //$$     float z1 = (float) (pos.getZ() - cameraPos.z - 0.001);
+    //$$     float x2 = (float) (pos.getX() - cameraPos.x + 1 + 0.001);
+    //$$     float y2 = (float) (pos.getY() - cameraPos.y + 1 + 0.001);
+    //$$     float z2 = (float) (pos.getZ() - cameraPos.z + 1 + 0.001);
     //$$
     //$$     triLegacy(buf, x1, y1, z1, x2, y1, z1, x2, y1, z2, r, g, b, a);
     //$$     triLegacy(buf, x1, y1, z1, x2, y1, z2, x1, y1, z2, r, g, b, a);
@@ -495,14 +494,14 @@ public class BlockHighlightRenderer implements IRenderer {
     //$$     buf.vertex(x3, y3, z3).color(r, g, b, a).endVertex();
     //$$ }
     //$$
-    //$$ private void addOutlineBoxLegacy(BufferBuilder buf, BlockPos pos, double expand,
+    //$$ private void addOutlineBoxLegacy(BufferBuilder buf, BlockPos pos,
     //$$                                  int r, int g, int b, int a, Vec3 cameraPos) {
-    //$$     float x1 = (float) (pos.getX() - cameraPos.x - expand);
-    //$$     float y1 = (float) (pos.getY() - cameraPos.y - expand);
-    //$$     float z1 = (float) (pos.getZ() - cameraPos.z - expand);
-    //$$     float x2 = (float) (pos.getX() - cameraPos.x + 1 + expand);
-    //$$     float y2 = (float) (pos.getY() - cameraPos.y + 1 + expand);
-    //$$     float z2 = (float) (pos.getZ() - cameraPos.z + 1 + expand);
+    //$$     float x1 = (float) (pos.getX() - cameraPos.x );
+    //$$     float y1 = (float) (pos.getY() - cameraPos.y );
+    //$$     float z1 = (float) (pos.getZ() - cameraPos.z );
+    //$$     float x2 = (float) (pos.getX() - cameraPos.x + 1 );
+    //$$     float y2 = (float) (pos.getY() - cameraPos.y + 1 );
+    //$$     float z2 = (float) (pos.getZ() - cameraPos.z + 1 );
     //$$
     //$$     edge3Legacy(buf, x1, y1, z1, x2, y1, z1, r, g, b, a);
     //$$     edge3Legacy(buf, x2, y1, z1, x2, y1, z2, r, g, b, a);
